@@ -56,6 +56,17 @@ function getbasedata() {
 	document.getElementById("page-wrap").innerHTML += '<a href="#" onclick="redir();">Click here</a> to update your contact list with the current Red Frog alliance contacts.<br />';
 }
 
+function checkstate() {
+if (extractFromHash("state", hash) !== $.cookie(csrfTokenName)) {
+		$.cookie(csrfTokenName, null);
+		document.getElementById("page-wrap").innerHTML = "Ummm, I'm sorry, but something bad happened.<br /><br />";
+		document.getElementById("page-wrap").innerHTML += "Let me explain the problem. The thing is that the cookie we set when we sent you to the login page does not match with the answer we received back from the EVE authentication server. I don't want you to be alarmed but this might mean something fishy is going on, like maybe you have been hacked or have a virus, but I'm not that familiar with cookies, so I don't know what's going on really. You did nothing wrong, but I can't let you access the application in this case. My best guess at this point is to ask you to please go back to the beginning and try again or close and restart your web browser and maybe the problem will fix itself. :-)<br /><br />";
+		document.getElementById("page-wrap").innerHTML += '<a href="index.html">Ooookay, take me back to the start.</a>';
+		return (false);
+	}
+	return (true);
+}
+
 var hash = document.location.hash;
 token = extractFromHash("access_token", hash);
 
@@ -64,6 +75,8 @@ if (token) {
 	// We can then get the current token expiry from the json that the get request spits back. Then we only need to check it against the current timestamp. It's magic.
 	// Update: this is not needed anymore, using multi curl we only use one php script now which abides by the request rate limits of the CREST API, so no way the 20 minutes limit would be exceeded even if we do a thousand requests and populate the user's contact list fully.
 	
+	wegood = checkstate();
+	if (wegood) {
 	// Delete CSRF token cookie.
 	$.cookie(csrfTokenName, null);
 	
@@ -78,6 +91,7 @@ if (token) {
 	document.getElementById("page-wrap").innerHTML += 'API key vCode: <input type="text" name="vCode" id="vCode"><br />';
 	document.getElementById("page-wrap").innerHTML += '<button onclick="getbasedata();">Submit</button>';
 	document.getElementById("page-wrap").innerHTML += '</form>';
+	}
 }
 else {
 
