@@ -12,7 +12,7 @@
 	
 </head>
 <body>
-<img src="http://community.eveonline.com/bitmaps/interface/community/bg.jpg" class="bg">
+<img src="bg.jpg" class="bg">
 <div id="page-wrap">Processing... please wait.</div>
 <?php
 $auth_code = $_GET["access_token"];
@@ -148,15 +148,26 @@ if ($xml->error) {
 	$uzi = $uzi . '<a href="index.html">Take me back to the start.</a>';
 	clearwrap();
 	prettify($uzi);
+	exit;
 } elseif ($xml->result->rowset->row[0]) {
     $karID = (int) $xml->result->rowset->row[0]->attributes()->characterID;
+	if ($karID == 0) {
+		$uzi = "Whoops, I can&#39;t find your Red Frog Contract Alt by the name you&#39;ve given anywhere in the EVE universe. :-(";
+		$uzi = $uzi . "<br />Click the link below to go back and try again.<br />";
+		$uzi = $uzi . "<br />Make sure the form is filled exactly as requested. It might help if you copy paste your character name into the relevant form field, maybe by copying it from in-game directly. Also make sure your API key can access your Red Frog contract alt and the needed permission is set. Maybe try making a completely new API key by following the link given where you fill in the form.<br />";
+		$uzi = $uzi . '<a href="index.html">Take me back to the start.</a>';
+		clearwrap();
+		prettify($uzi);
+		exit;
+	}
 } else {
-    $uzi = "Whoops, I can't find your Red Frog Contract Alt by the name you've given in the EVE universe. :-(";
+    $uzi = "Whoops, I can&#39;t find your Red Frog Contract Alt by the name you&#39;ve given anywhere in the EVE universe. :-(";
 	$uzi = $uzi . "<br />Click the link below to go back and try again.<br />";
-	$uzi = $uzi . "<br />Make sure the form is filled exactly as requested. It might help if you copy paste your character name into the relevant form field, maybe by copying it from in-game directly.<br />";
+	$uzi = $uzi . "<br />Make sure the form is filled exactly as requested. It might help if you copy paste your character name into the relevant form field, maybe by copying it from in-game directly. Also make sure your API key can access your Red Frog contract alt and the needed permission is set. Maybe try making a completely new API key by following the link given where you fill in the form.<br />";
 	$uzi = $uzi . '<a href="index.html">Take me back to the start.</a>';
 	clearwrap();
 	prettify($uzi);
+	exit;
 }
 
 $headers = array(
@@ -202,28 +213,32 @@ if ($xml->error) {
 	$uzi = $uzi . '<a href="index.html">Take me back to the start.</a>';
 	clearwrap();
 	prettify($uzi);
+	exit;
 } elseif ($xml->result->rowset[4]) {
     $allicontpc = $xml->result->rowset[4]->count();
-} else {
-    $uzi = "Whoops, seems like you have no alliance contacts. In that case I got no soup for your. :-(";
+	if ($allicontpc == 0) {
+	$uzi = "Whoops, seems like you have no alliance contacts. In that case I got no soup for your. :-(<br />";
 	$uzi = $uzi . "<br />Click the link below to go back and try again.<br />";
+	$uzi = $uzi. "<br />Make sure the character name you use on the form is the name of your Red Frog contract alt. If you accidentally give there the name of a character who is not in any alliance (or in an alliance with no alliance contacts set), then this application won&#39;t work, because then there are no alliance contacts at all to copy.<br />";
 	$uzi = $uzi . '<a href="index.html">Take me back to the start.</a>';
 	clearwrap();
 	prettify($uzi);
+	exit;
+	}
+} else {
+    $uzi = "Whoops, seems like you have no alliance contacts. In that case I got no soup for your. :-(<br />";
+	$uzi = $uzi . "<br />Click the link below to go back and try again.<br />";
+	$uzi = $uzi. "<br />Make sure the character name you use on the form is the name of your Red Frog contract alt. If you accidentally give there the name of a character who is not in any alliance (or in an alliance with no alliance contacts set), then this application won&#39;t work, because then there are no alliance contacts at all to copy.<br />";
+	$uzi = $uzi . '<a href="index.html">Take me back to the start.</a>';
+	clearwrap();
+	prettify($uzi);
+	exit;
 }
 
 if (isset($allicontpc)) {
-	if ($allicontpc == 0) {
-	$uzi = "Whoops, seems like you have no alliance contacts. In that case I got no soup for your. :-(";
-	$uzi = $uzi . "<br />Click the link below to go back and try again.<br />";
-	$uzi = $uzi . '<a href="index.html">Take me back to the start.</a>';
-	clearwrap();
-	prettify($uzi);
-	} else {
-		foreach ($xml->result->rowset[4]->row as $row) {
-			$kt = getContactType($row{'contactTypeID'});
-			$baddies[] = array((int)$row{'standing'},$kt . $row{'contactID'} . "/");
-		}
+	foreach ($xml->result->rowset[4]->row as $row) {
+		$kt = getContactType($row{'contactTypeID'});
+		$baddies[] = array((int)$row{'standing'},$kt . $row{'contactID'} . "/");
 	}
 }
 
